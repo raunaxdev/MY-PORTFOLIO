@@ -1,6 +1,6 @@
 import { supabase } from "./supabase.js";
 
-// Typing Text
+// Typing Text Effect
 const typingText = document.getElementById("typingText");
 
 const roles = [
@@ -16,6 +16,8 @@ let charIndex = 0;
 let isDeleting = false;
 
 function typeEffect() {
+  if (!typingText) return;
+  
   const currentRole = roles[roleIndex];
 
   if (isDeleting) {
@@ -40,31 +42,30 @@ function typeEffect() {
 
 typeEffect();
 
-
-// Mobile Menu
+// Mobile Menu Navigation
 const menuBtn = document.getElementById("menuBtn");
 const navLinks = document.getElementById("navLinks");
 
-menuBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
-
-document.querySelectorAll(".nav-links a").forEach(link => {
-  link.addEventListener("click", () => {
-    navLinks.classList.remove("active");
+if (menuBtn && navLinks) {
+  menuBtn.addEventListener("click", () => {
+    navLinks.classList.toggle("active");
   });
-});
 
+  document.querySelectorAll(".nav-links a").forEach(link => {
+    link.addEventListener("click", () => {
+      navLinks.classList.remove("active");
+    });
+  });
+}
 
-// Elements
+// DOM Elements
 const journeyList = document.getElementById("journeyList");
 const projectList = document.getElementById("projectList");
 const certificateList = document.getElementById("certificateList");
 const goalList = document.getElementById("goalList");
 const feedbackForm = document.getElementById("feedbackForm");
 
-
-// Helpers
+// Utility Functions
 function escapeHTML(value) {
   return String(value || "")
     .replaceAll("&", "&amp;")
@@ -76,9 +77,7 @@ function escapeHTML(value) {
 
 function safeURL(value) {
   const url = String(value || "").trim();
-
   if (!url) return "#";
-
   if (
     url.startsWith("http://") ||
     url.startsWith("https://") ||
@@ -86,12 +85,10 @@ function safeURL(value) {
   ) {
     return escapeHTML(url);
   }
-
   return "#";
 }
 
-
-// Fetch Data
+// Fetch Data from Supabase
 async function getTableData(tableName) {
   const { data, error } = await supabase
     .from(tableName)
@@ -106,11 +103,10 @@ async function getTableData(tableName) {
   return data || [];
 }
 
-
-// Render Journey
+// Render Journey Section
 function renderJourney(data) {
+  if (!journeyList) return;
   journeyList.innerHTML = "";
-
 
   if (!data.length) {
     journeyList.innerHTML = `<p class="feedback-note">No journey updates added yet.</p>`;
@@ -131,9 +127,9 @@ function renderJourney(data) {
   });
 }
 
-
-// Render Projects
+// Render Projects Section
 function renderProjects(data) {
+  if (!projectList) return;
   projectList.innerHTML = "";
 
   if (!data.length) {
@@ -147,33 +143,33 @@ function renderProjects(data) {
 
     const tech = Array.isArray(project.tech) ? project.tech : [];
 
-   div.innerHTML = `
-  ${
-    project.image_url
-      ? `<img src="${safeURL(project.image_url)}" class="project-image" alt="${escapeHTML(project.title)}" />`
-      : `<div class="card-icon">${escapeHTML(project.icon || "💻")}</div>`
-  }
+    div.innerHTML = `
+      ${
+        project.image_url
+          ? `<img src="${safeURL(project.image_url)}" class="project-image" alt="${escapeHTML(project.title)}" />`
+          : `<div class="card-icon"><i class="fa-solid fa-code"></i></div>`
+      }
 
-  <h3>${escapeHTML(project.title)}</h3>
-  <p>${escapeHTML(project.description)}</p>
+      <h3>${escapeHTML(project.title)}</h3>
+      <p>${escapeHTML(project.description)}</p>
 
-  <div class="tags">
-    ${tech.map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}
-  </div>
+      <div class="tags">
+        ${tech.map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}
+      </div>
 
-  <div class="card-links">
-    <a href="${safeURL(project.live)}" target="_blank">Live Demo</a>
-    <a href="${safeURL(project.github)}" target="_blank">GitHub</a>
-  </div>
-`;
+      <div class="card-links">
+        <a href="${safeURL(project.live)}" target="_blank"><i class="fa-solid fa-arrow-up-right-from-square"></i> Live Demo</a>
+        <a href="${safeURL(project.github)}" target="_blank"><i class="fa-brands fa-github"></i> GitHub</a>
+      </div>
+    `;
 
     projectList.appendChild(div);
   });
 }
 
-
-// Render Certificates
+// Render Certificates Section
 function renderCertificates(data) {
+  if (!certificateList) return;
   certificateList.innerHTML = "";
 
   if (!data.length) {
@@ -191,10 +187,10 @@ function renderCertificates(data) {
       ${
         certificate.image_url
           ? `<img src="${safeURL(certificate.image_url)}" class="certificate-image" alt="${escapeHTML(certificate.title)}" />`
-          : `<div class="card-icon">${escapeHTML(certificate.icon || "🏆")}</div>`
+          : `<div class="card-icon"><i class="fa-solid fa-award"></i></div>`
       }
 
-      <h3>${certificate.icon ? escapeHTML(certificate.icon) + " " : ""}${escapeHTML(certificate.title)}</h3>
+      <h3>${escapeHTML(certificate.title)}</h3>
       <p>${escapeHTML(certificate.description)}</p>
 
       <div class="tags">
@@ -206,9 +202,9 @@ function renderCertificates(data) {
   });
 }
 
-
-// Render Goals
+// Render Goals Section
 function renderGoals(data) {
+  if (!goalList) return;
   goalList.innerHTML = "";
 
   if (!data.length) {
@@ -229,18 +225,19 @@ function renderGoals(data) {
   });
 }
 
-
-// Load All Data
+// Load All Dynamic Portfolio Data
 async function loadPortfolioData() {
-  journeyList.innerHTML = `<p class="feedback-note">Loading journey...</p>`;
-  projectList.innerHTML = `<p class="feedback-note">Loading projects...</p>`;
-  certificateList.innerHTML = `<p class="feedback-note">Loading certificates...</p>`;
-  goalList.innerHTML = `<p class="feedback-note">Loading goals...</p>`;
+  if (journeyList) journeyList.innerHTML = `<p class="feedback-note">Loading journey...</p>`;
+  if (projectList) projectList.innerHTML = `<p class="feedback-note">Loading projects...</p>`;
+  if (certificateList) certificateList.innerHTML = `<p class="feedback-note">Loading certificates...</p>`;
+  if (goalList) goalList.innerHTML = `<p class="feedback-note">Loading goals...</p>`;
 
-  const journey = await getTableData("journey");
-  const projects = await getTableData("projects");
-  const certificates = await getTableData("certificates");
-  const goals = await getTableData("goals");
+  const [journey, projects, certificates, goals] = await Promise.all([
+    getTableData("journey"),
+    getTableData("projects"),
+    getTableData("certificates"),
+    getTableData("goals")
+  ]);
 
   renderJourney(journey);
   renderProjects(projects);
@@ -250,42 +247,43 @@ async function loadPortfolioData() {
   startRevealAnimation();
 }
 
+// Web3Forms AJAX Feedback Form Submit (Without Page Reload)
+if (feedbackForm) {
+  feedbackForm.addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-// Feedback Submit
-feedbackForm.addEventListener("submit", async function (event) {
-  event.preventDefault();
+    const submitBtn = feedbackForm.querySelector("button[type='submit']");
+    const originalText = submitBtn.textContent;
+    submitBtn.textContent = "Sending...";
+    submitBtn.disabled = true;
 
-  const name = document.getElementById("feedbackName").value.trim();
-  const email = document.getElementById("feedbackEmail").value.trim();
-  const message = document.getElementById("feedbackMessage").value.trim();
+    const formData = new FormData(feedbackForm);
 
-  if (!name || !message) {
-    alert("Name aur feedback message required hai.");
-    return;
-  }
+    try {
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData
+      });
 
-  const { error } = await supabase
-    .from("feedback")
-    .insert([
-      {
-        name,
-        email,
-        message
+      const result = await response.json();
+
+      if (result.success) {
+        alert("Thank you! Your feedback was submitted successfully.");
+        feedbackForm.reset();
+      } else {
+        alert("Submission failed. Please try again later.");
       }
-    ]);
+    } catch (error) {
+      console.error("Error submitting feedback:", error);
+      alert("Something went wrong! Please try again.");
+    } finally {
+      submitBtn.textContent = originalText;
+      submitBtn.disabled = false;
+    }
+  });
+}
 
-  if (error) {
-    console.error(error.message);
-    alert("Feedback submit nahi hua. Supabase policy check karo.");
-    return;
-  }
-
-  alert("Thank you! Your feedback submitted successfully.");
-  feedbackForm.reset();
-});
-
-
-// Reveal Animation
+// Scroll Reveal Animation
 function startRevealAnimation() {
   const revealElements = document.querySelectorAll(".reveal");
 
@@ -297,9 +295,7 @@ function startRevealAnimation() {
         }
       });
     },
-    {
-      threshold: 0.15
-    }
+    { threshold: 0.1 }
   );
 
   revealElements.forEach(element => {
@@ -307,32 +303,37 @@ function startRevealAnimation() {
   });
 }
 
+// Image Modal Preview for Certificates
 const imageModal = document.getElementById("imageModal");
 const modalImage = document.getElementById("modalImage");
 const modalClose = document.getElementById("modalClose");
 
-document.addEventListener("click", function (event) {
-  if (event.target.classList.contains("certificate-image")) {
-    modalImage.src = event.target.src;
-    imageModal.classList.add("active");
-  }
-});
+if (imageModal && modalImage && modalClose) {
+  document.addEventListener("click", function (event) {
+    if (event.target.classList.contains("certificate-image") || event.target.classList.contains("project-image")) {
+      modalImage.src = event.target.src;
+      imageModal.classList.add("active");
+    }
+  });
 
-modalClose.addEventListener("click", function () {
-  imageModal.classList.remove("active");
-  modalImage.src = "";
-});
-
-imageModal.addEventListener("click", function (event) {
-  if (event.target === imageModal) {
+  modalClose.addEventListener("click", function () {
     imageModal.classList.remove("active");
     modalImage.src = "";
-  }
-});
+  });
 
-loadPortfolioData();
+  imageModal.addEventListener("click", function (event) {
+    if (event.target === imageModal) {
+      imageModal.classList.remove("active");
+      modalImage.src = "";
+    }
+  });
+}
+
+// Dynamic Footer Current Year
 const currentYear = document.getElementById("currentYear");
-
 if (currentYear) {
   currentYear.textContent = new Date().getFullYear();
 }
+
+// Execute Data Load
+loadPortfolioData();
