@@ -262,7 +262,7 @@ h3 {
   aspect-ratio: 6 / 7;
   overflow: hidden;
   padding: 6px;
-  background: linear-gradient(145deg, #18181b, #09090b);
+  background: radial-gradient(circle at 50% 35%, #27272a 0%, #121214 100%);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
@@ -589,18 +589,23 @@ h3 {
 .about-layout {
   display: grid;
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-  align-items: stretch;
+  align-items: start;
   gap: 42px;
 }
 
 .about-intro {
-  display: flex;
-  align-items: center;
+  display: grid;
+  align-self: start;
+  gap: 16px;
   max-width: 450px;
-  margin: 0;
+  margin-top: 0;
   color: #D4D4D8;
   font-size: 0.925rem;
   line-height: 1.65;
+}
+
+.about-intro p {
+  margin: 0;
 }
 
 .stack-panel {
