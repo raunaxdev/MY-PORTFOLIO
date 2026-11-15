@@ -88,19 +88,23 @@ loginForm.addEventListener("submit", async event => {
 
   const email = document.getElementById("adminEmail").value.trim();
   const password = document.getElementById("adminPassword").value.trim();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
 
-  if (error) {
-    console.error("Login failed:", error.message);
-    alert("Login failed: " + error.message);
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  } catch (error) {
+    console.error("Login failed:", error);
+    alert("Login failed. Check your credentials and connection.");
   }
 });
 
 logoutBtn.addEventListener("click", async () => {
-  const { error } = await supabase.auth.signOut();
-  if (error) {
-    console.error("Sign out failed:", error.message);
-    alert("Sign out failed: " + error.message);
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  } catch (error) {
+    console.error("Sign out failed:", error);
+    alert("Sign out failed. Please try again.");
   }
 });
 
@@ -108,7 +112,10 @@ supabase.auth.onAuthStateChange((event, session) => {
   if (session) {
     loginScreen.classList.add("hidden");
     adminDashboard.classList.remove("hidden");
-    loadSection(activeSection);
+    loadSection(activeSection).catch(error => {
+      console.error("Could not load admin section:", error);
+      itemsList.innerHTML = `<div class="empty-message">Could not load this section. Please try again.</div>`;
+    });
   } else {
     loginScreen.classList.remove("hidden");
     adminDashboard.classList.add("hidden");
@@ -116,32 +123,35 @@ supabase.auth.onAuthStateChange((event, session) => {
 });
 
 async function checkSession() {
-  const { data, error } = await supabase.auth.getSession();
-  if (error) {
-    console.error("Could not check admin session:", error.message);
-    return;
-  }
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) throw error;
 
-  if (data.session) {
-    loginScreen.classList.add("hidden");
-    adminDashboard.classList.remove("hidden");
-    loadSection(activeSection);
+    if (data.session) {
+      loginScreen.classList.add("hidden");
+      adminDashboard.classList.remove("hidden");
+      await loadSection(activeSection);
+    }
+  } catch (error) {
+    console.error("Could not check admin session:", error);
   }
 }
 
 async function getSectionData(sectionName) {
   const tableName = sections[sectionName].table;
-  const { data, error } = await supabase
-    .from(tableName)
-    .select("*")
-    .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error(`Error loading ${sectionName}:`, error.message);
-    return [];
+  try {
+    const { data, error } = await supabase
+      .from(tableName)
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error(`Error loading ${sectionName}:`, error);
+    return;
   }
-
-  return data || [];
 }
 
 async function uploadPortfolioImage(file, folderName = "uploads") {
@@ -192,6 +202,7 @@ function renderForm(item = {}) {
 
   dynamicFields.innerHTML = fields.map(field => {
     if (field.type === "file") {
+      const fieldId = `admin-${sectionName}-${field.name}`;
       const required = !field.optional && !item.image_url;
       const helpText = sectionName === "projects"
         ? "Optional. Upload a screenshot for this project."
@@ -199,9 +210,9 @@ function renderForm(item = {}) {
 
       return `
         <div class="field">
-          <label>${field.label}</label>
-          <input type="file" name="${field.name}" accept="${field.accept || "image/*"}" ${required ? "required" : ""}>
-          ${item.image_url ? `<img src="${escapeHTML(item.image_url)}" class="form-preview" alt="Current ${escapeHTML(field.label.toLowerCase())}">` : ""}
+          <label for="${fieldId}">${field.label}</label>
+          <input id="${fieldId}" type="file" name="${field.name}" accept="${field.accept || "image/*"}" ${required ? "required" : ""}>
+          ${item.image_url ? `<img src="${escapeHTML(item.image_url)}" class="form-preview" alt="Current ${escapeHTML(field.label.toLowerCase())}" loading="lazy" decoding="async">` : ""}
           <p class="file-note">${helpText}</p>
         </div>
       `;
@@ -211,20 +222,21 @@ function renderForm(item = {}) {
       ? tagsToString(item.tech || [])
       : item[field.name] || "";
     const escapedValue = escapeHTML(value);
+    const fieldId = `admin-${sectionName}-${field.name}`;
 
     if (field.type === "textarea") {
       return `
         <div class="field">
-          <label>${field.label}</label>
-          <textarea name="${field.name}" placeholder="${field.placeholder}" required>${escapedValue}</textarea>
+          <label for="${fieldId}">${field.label}</label>
+          <textarea id="${fieldId}" name="${field.name}" placeholder="${field.placeholder}" required>${escapedValue}</textarea>
         </div>
       `;
     }
 
     return `
       <div class="field">
-        <label>${field.label}</label>
-        <input type="${field.type}" name="${field.name}" value="${escapedValue}" placeholder="${field.placeholder}" required>
+        <label for="${fieldId}">${field.label}</label>
+        <input id="${fieldId}" type="${field.type}" name="${field.name}" value="${escapedValue}" placeholder="${field.placeholder}" required>
       </div>
     `;
   }).join("");
@@ -280,7 +292,14 @@ itemForm.addEventListener("submit", async event => {
 });
 
 async function renderItems() {
-  currentItems = await getSectionData(activeSection);
+  const items = await getSectionData(activeSection);
+  if (!items) {
+    currentItems = [];
+    itemsList.innerHTML = `<div class="empty-message">Could not load items. Please try again.</div>`;
+    return;
+  }
+
+  currentItems = items;
   if (!currentItems.length) {
     itemsList.innerHTML = `<div class="empty-message">No items added yet.</div>`;
     return;
@@ -291,7 +310,7 @@ async function renderItems() {
     return `
       <article class="admin-item">
         ${item.date ? `<div class="item-meta">${escapeHTML(item.date)}</div>` : ""}
-        ${item.image_url ? `<img src="${escapeHTML(item.image_url)}" class="form-preview" alt="${escapeHTML(item.title || "Portfolio item")}">` : ""}
+        ${item.image_url ? `<img src="${escapeHTML(item.image_url)}" class="form-preview" alt="${escapeHTML(item.title || "Portfolio item")}" loading="lazy" decoding="async">` : ""}
         <h3>${escapeHTML(item.title)}</h3>
         <p>${escapeHTML(item.description)}</p>
         ${tags.length ? `<div class="tag-row">${tags.map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}</div>` : ""}
@@ -326,22 +345,29 @@ function editItem(id) {
 async function deleteItem(id) {
   if (!confirm("Are you sure you want to delete this item?")) return;
 
-  const { error } = await supabase
-    .from(sections[activeSection].table)
-    .delete()
-    .eq("id", id);
+  try {
+    const { error } = await supabase
+      .from(sections[activeSection].table)
+      .delete()
+      .eq("id", id);
 
-  if (error) {
-    console.error("Could not delete item:", error.message);
+    if (error) throw error;
+    await renderItems();
+  } catch (error) {
+    console.error("Could not delete item:", error);
     alert("Delete failed.");
-    return;
   }
-
-  await renderItems();
 }
 
 async function renderFeedback() {
-  currentItems = await getSectionData("feedback");
+  const items = await getSectionData("feedback");
+  if (!items) {
+    currentItems = [];
+    itemsList.innerHTML = `<div class="empty-message">Could not load feedback. Please try again.</div>`;
+    return;
+  }
+
+  currentItems = items;
   if (!currentItems.length) {
     itemsList.innerHTML = `<div class="empty-message">No messages yet.</div>`;
     return;
@@ -361,13 +387,14 @@ async function renderFeedback() {
     button.addEventListener("click", async () => {
       if (!confirm("Delete this message?")) return;
 
-      const { error } = await supabase.from("feedback").delete().eq("id", button.dataset.id);
-      if (error) {
-        console.error("Could not delete message:", error.message);
+      try {
+        const { error } = await supabase.from("feedback").delete().eq("id", button.dataset.id);
+        if (error) throw error;
+        await renderFeedback();
+      } catch (error) {
+        console.error("Could not delete message:", error);
         alert("Message could not be deleted.");
-        return;
       }
-      await renderFeedback();
     });
   });
 }
@@ -381,7 +408,12 @@ resetFormBtn.addEventListener("click", () => {
 });
 
 navButtons.forEach(button => {
-  button.addEventListener("click", () => loadSection(button.dataset.section));
+  button.addEventListener("click", () => {
+    loadSection(button.dataset.section).catch(error => {
+      console.error("Could not load admin section:", error);
+      itemsList.innerHTML = `<div class="empty-message">Could not load this section. Please try again.</div>`;
+    });
+  });
 });
 
 checkSession();

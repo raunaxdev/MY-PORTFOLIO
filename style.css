@@ -771,6 +771,14 @@ h3 {
   gap: 9px;
 }
 
+.form-honeypot {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
 .contact-form-panel label {
   margin-top: 5px;
   color: var(--muted);

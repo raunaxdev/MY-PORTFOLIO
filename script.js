@@ -117,17 +117,22 @@ function renderProjectLink(url, label, icon) {
 }
 
 async function getTableData(tableName) {
-  const { data, error } = await supabase
-    .from(tableName)
-    .select("*")
-    .order("created_at", { ascending: false });
+  try {
+    const { data, error } = await supabase
+      .from(tableName)
+      .select("*")
+      .order("created_at", { ascending: false });
 
-  if (error) {
-    console.error(`Error loading ${tableName}:`, error.message);
+    if (error) {
+      console.error(`Error loading ${tableName}:`, error.message);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error(`Error loading ${tableName}:`, error);
     return [];
   }
-
-  return data || [];
 }
 
 function renderProjects(data) {
@@ -145,7 +150,7 @@ function renderProjects(data) {
           <div class="browser-chrome" aria-hidden="true">
             <span></span><span></span><span></span><span class="browser-address"></span>
           </div>
-          <img src="${imageURL}" class="project-image" alt="${escapeHTML(title)}">
+          <img src="${imageURL}" class="project-image" alt="${escapeHTML(title)}" width="1600" height="900" loading="lazy" decoding="async">
         </div>
       `
       : `
@@ -183,7 +188,7 @@ function renderCertificates(data) {
       <article class="experience-card">
         ${hasImage ? `
           <button class="certificate-preview" type="button" aria-label="Preview ${escapeHTML(title)}">
-            <img src="${imageURL}" class="certificate-image" alt="${escapeHTML(title)} certificate">
+            <img src="${imageURL}" class="certificate-image" alt="${escapeHTML(title)} certificate" width="1000" height="625" loading="lazy" decoding="async">
           </button>
         ` : ""}
         <p class="experience-type">Certificate / achievement</p>
@@ -256,9 +261,16 @@ updateActiveNav();
 feedbackForm.addEventListener("submit", async event => {
   event.preventDefault();
 
+  const website = document.getElementById("contactWebsite").value.trim();
   const name = document.getElementById("feedbackName").value.trim();
   const email = document.getElementById("feedbackEmail").value.trim();
   const message = document.getElementById("feedbackMessage").value.trim();
+
+  if (website) {
+    contactStatus.textContent = "Your message could not be sent. Please email directly.";
+    contactStatus.dataset.state = "error";
+    return;
+  }
 
   if (!name || !email || !message) {
     contactStatus.textContent = "Please complete all fields before sending.";
