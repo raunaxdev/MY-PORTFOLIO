@@ -291,6 +291,29 @@ feedbackForm.addEventListener("submit", async event => {
 
     if (error) throw error;
 
+    void (async () => {
+      try {
+        const response = await fetch("https://api.web3forms.com/submit", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_key: "56647ca1-9371-49ee-a6e0-c5e3fc0e34a9",
+            name,
+            email,
+            message,
+            subject: "New Portfolio Feedback from " + name
+          })
+        });
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+          throw new Error(result.message || `Web3Forms returned HTTP ${response.status}`);
+        }
+      } catch (error) {
+        console.warn("Web3Forms email notification failed:", error);
+      }
+    })();
+
     feedbackForm.reset();
     contactStatus.textContent = "Your message was sent. Thank you.";
     contactStatus.dataset.state = "success";
