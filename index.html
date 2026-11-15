@@ -39,7 +39,7 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
     <nav class="nav-links" id="navLinks" aria-label="Main navigation">
-      <a href="#projects">Work</a>
+      <a href="#projects" class="active" aria-current="location">Work</a>
       <a href="#experience">Experience</a>
       <a href="#about">About</a>
       <a href="#contact">Contact</a>
@@ -63,8 +63,7 @@
         </div>
       </div>
       <div class="hero-portrait">
-        <img src="assets/profile.jpg" alt="Portrait of Raunak Kumar Jha" width="480" height="560">
-        <div class="portrait-caption"><span>Based in Jharkhand</span><span>India</span></div>
+        <img src="./assets/profile.jpg" alt="Portrait of Raunak Kumar Jha" width="480" height="560">
       </div>
     </section>
 
@@ -78,32 +77,65 @@
       </div>
       <div class="project-grid" id="projectList">
         <article class="project-card">
-          <div class="project-index">01 / PORTAL</div>
-          <h3>CIITM Web Portal</h3>
-          <p>A web portal for CIITM, organized around clear access to college information and student-facing resources.</p>
-          <div class="tag-list"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
-          <div class="card-links">
-            <a href="https://ciitm-web.vercel.app" target="_blank" rel="noopener noreferrer">Live site</a>
-            <a href="https://github.com/raunaxdev/CIITM-WEB" target="_blank" rel="noopener noreferrer">Source</a>
+          <div class="project-preview" aria-hidden="true">
+            <span class="preview-kicker">Technical preview</span>
+            <span class="preview-badge">HTML</span>
+          </div>
+          <div class="project-card-content">
+            <p class="project-index">01 / PORTAL</p>
+            <h3>CIITM Web Portal</h3>
+            <p class="project-card-description">A web portal for CIITM, organized around clear access to college information and student-facing resources.</p>
+            <div class="tag-list"><span>HTML</span><span>CSS</span><span>JavaScript</span></div>
+            <div class="card-links">
+              <a class="card-action" href="https://ciitm-web.vercel.app" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 11 11 5M5 5h6v6"/></svg>
+                <span>Live Demo</span>
+              </a>
+              <a class="card-action" href="https://github.com/raunaxdev/CIITM-WEB" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 .7a7.3 7.3 0 0 0-2.31 14.23c.37.07.5-.16.5-.36v-1.38c-2.05.45-2.49-.86-2.49-.86-.33-.85-.8-1.08-.8-1.08-.66-.45.05-.44.05-.44.73.05 1.12.75 1.12.75.65 1.12 1.7.8 2.12.61.07-.47.25-.8.46-.98-1.64-.19-3.36-.82-3.36-3.65 0-.8.29-1.47.76-1.98-.08-.19-.33-.94.07-1.95 0 0 .62-.2 2.01.75a6.98 6.98 0 0 1 3.66 0c1.39-.95 2.01-.75 2.01-.75.4 1.01.15 1.76.07 1.95.47.51.76 1.18.76 1.98 0 2.84-1.73 3.46-3.38 3.65.27.23.5.68.5 1.36v2.01c0 .2.13.43.51.36A7.3 7.3 0 0 0 8 .7Z"/></svg>
+                <span>Source</span>
+              </a>
+            </div>
           </div>
         </article>
         <article class="project-card">
-          <div class="project-index">02 / PRODUCT</div>
-          <h3>ChangeRadar</h3>
-          <p>A web product for monitoring changes and presenting relevant updates in one place.</p>
-          <div class="tag-list"><span>TypeScript</span><span>JavaScript</span><span>Python</span></div>
-          <div class="card-links">
-            <a href="https://changeradar-roan.vercel.app" target="_blank" rel="noopener noreferrer">Live site</a>
-            <a href="https://github.com/raunaxdev/changeradar" target="_blank" rel="noopener noreferrer">Source</a>
+          <div class="project-preview" aria-hidden="true">
+            <span class="preview-kicker">Technical preview</span>
+            <span class="preview-badge">TypeScript</span>
+          </div>
+          <div class="project-card-content">
+            <p class="project-index">02 / PRODUCT</p>
+            <h3>ChangeRadar</h3>
+            <p class="project-card-description">A web product for monitoring changes and presenting relevant updates in one place.</p>
+            <div class="tag-list"><span>TypeScript</span><span>JavaScript</span><span>Python</span></div>
+            <div class="card-links">
+              <a class="card-action" href="https://changeradar-roan.vercel.app" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 11 11 5M5 5h6v6"/></svg>
+                <span>Live Demo</span>
+              </a>
+              <a class="card-action" href="https://github.com/raunaxdev/changeradar" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M8 .7a7.3 7.3 0 0 0-2.31 14.23c.37.07.5-.16.5-.36v-1.38c-2.05.45-2.49-.86-2.49-.86-.33-.85-.8-1.08-.8-1.08-.66-.45.05-.44.05-.44.73.05 1.12.75 1.12.75.65 1.12 1.7.8 2.12.61.07-.47.25-.8.46-.98-1.64-.19-3.36-.82-3.36-3.65 0-.8.29-1.47.76-1.98-.08-.19-.33-.94.07-1.95 0 0 .62-.2 2.01.75a6.98 6.98 0 0 1 3.66 0c1.39-.95 2.01-.75 2.01-.75.4 1.01.15 1.76.07 1.95.47.51.76 1.18.76 1.98 0 2.84-1.73 3.46-3.38 3.65.27.23.5.68.5 1.36v2.01c0 .2.13.43.51.36A7.3 7.3 0 0 0 8 .7Z"/></svg>
+                <span>Source</span>
+              </a>
+            </div>
           </div>
         </article>
         <article class="project-card">
-          <div class="project-index">03 / SIMULATOR</div>
-          <h3>Electronic Voting Machine Simulator</h3>
-          <p>A software simulation of an electronic voting workflow, built to demonstrate vote selection and result handling.</p>
-          <div class="tag-list"><span>Software project</span><span>Simulation</span></div>
-          <div class="card-links">
-            <a href="https://github.com/raunaxdev" target="_blank" rel="noopener noreferrer">GitHub profile</a>
+          <div class="project-preview" aria-hidden="true">
+            <span class="preview-kicker">Technical preview</span>
+            <span class="preview-badge">Simulation</span>
+          </div>
+          <div class="project-card-content">
+            <p class="project-index">03 / SIMULATOR</p>
+            <h3>Electronic Voting Machine Simulator</h3>
+            <p class="project-card-description">A software simulation of an electronic voting workflow, built to demonstrate vote selection and result handling.</p>
+            <div class="tag-list"><span>Software project</span><span>Simulation</span></div>
+            <div class="card-links">
+              <a class="card-action" href="https://github.com/raunaxdev" target="_blank" rel="noopener noreferrer">
+                <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false"><path d="M5 11 11 5M5 5h6v6"/></svg>
+                <span>GitHub Profile</span>
+              </a>
+            </div>
           </div>
         </article>
       </div>
