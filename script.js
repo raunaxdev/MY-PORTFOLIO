@@ -37,7 +37,14 @@ function escapeHTML(value) {
 }
 
 function safeURL(value) {
-  const url = String(value || "").trim();
+  let url = String(value || "").trim();
+
+  const markdownLink = url.match(/^\[[^\]]+\]\((https?:\/\/[^)]+)\)$/i);
+  if (markdownLink) {
+    url = markdownLink[1];
+  } else if (url.includes("](")) {
+    url = url.slice(0, url.indexOf("]("));
+  }
 
   if (!url) return "#";
 
@@ -46,6 +53,13 @@ function safeURL(value) {
     url.startsWith("https://") ||
     url.startsWith("assets/")
   ) {
+    try {
+      const parsedURL = new URL(url, window.location.href);
+      if (parsedURL.protocol !== "http:" && parsedURL.protocol !== "https:") return "#";
+    } catch {
+      return "#";
+    }
+
     return escapeHTML(url);
   }
 
@@ -56,9 +70,38 @@ function normalizeTech(tags) {
   if (!Array.isArray(tags)) return [];
 
   return tags
-    .map(tag => String(tag || "").trim())
+    .map(tag => displayText(tag).trim())
     .filter(tag => tag && tag.length <= 24)
     .slice(0, 4);
+}
+
+function displayText(value) {
+  return String(value || "").replaceAll("\u2014", ":");
+}
+
+function displayProjectTitle(title) {
+  const projectTitle = displayText(title).trim();
+
+  if (/CIITM/i.test(projectTitle) && /dashboard/i.test(projectTitle)) {
+    return "CIITM — Academic Management Dashboard";
+  }
+
+  return projectTitle;
+}
+
+function displayCertificateDescription(certificate) {
+  const title = String(certificate.title || "");
+  const description = displayText(certificate.description).trim();
+
+  if (/AI Foundations/i.test(title) && (/oracle|oci/i.test(title) || /oracle/i.test(description))) {
+    return "Earned the Oracle Cloud Infrastructure AI Foundations Associate certification with a 95% score, demonstrating a strong foundation in AI and cloud services.";
+  }
+
+  if (/techgyan/i.test(title) || (/techgyan/i.test(description) && /hackathon/i.test(description))) {
+    return "Competed in the Techgyan AI and Machine Learning Hackathon at IIT Patna, applying AI concepts to a time-bound challenge.";
+  }
+
+  return description;
 }
 
 function renderProjectLink(url, label, icon) {
@@ -89,9 +132,10 @@ async function getTableData(tableName) {
 
 function renderProjects(data) {
   projectList.innerHTML = data.slice(0, 6).map((project, index) => {
+    const title = displayProjectTitle(project.title);
     const tech = normalizeTech(project.tech);
     const imageURL = project.image_url ? safeURL(project.image_url) : "";
-    const category = String(project.category || "").trim();
+    const category = displayText(project.category).trim();
     const previewBadge = category && category.length <= 24
       ? category
       : tech[0] || "Software";
@@ -101,12 +145,11 @@ function renderProjects(data) {
           <div class="browser-chrome" aria-hidden="true">
             <span></span><span></span><span></span><span class="browser-address"></span>
           </div>
-          <img src="${imageURL}" class="project-image" alt="${escapeHTML(project.title)}">
+          <img src="${imageURL}" class="project-image" alt="${escapeHTML(title)}">
         </div>
       `
       : `
         <div class="project-preview" aria-hidden="true">
-          <span class="preview-kicker">Technical preview</span>
           <span class="preview-badge">${escapeHTML(previewBadge)}</span>
         </div>
       `;
@@ -116,11 +159,11 @@ function renderProjects(data) {
         ${preview}
         <div class="project-card-content">
           <p class="project-index">PROJECT / ${String(index + 1).padStart(2, "0")}</p>
-          <h3>${escapeHTML(project.title)}</h3>
-          <p class="project-card-description">${escapeHTML(project.description)}</p>
+          <h3>${escapeHTML(title)}</h3>
+          <p class="project-card-description">${escapeHTML(displayText(project.description))}</p>
           <div class="tag-list">${tech.map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}</div>
           <div class="card-links">
-            ${renderProjectLink(project.live, "Live Demo", externalLinkIcon)}
+            ${renderProjectLink(project.live, "Live site", externalLinkIcon)}
             ${renderProjectLink(project.github, "Source", githubIcon)}
           </div>
         </div>
@@ -131,20 +174,22 @@ function renderProjects(data) {
 
 function renderCertificates(data) {
   certificateList.innerHTML = data.map(certificate => {
+    const title = displayText(certificate.title);
     const tech = Array.isArray(certificate.tech) ? certificate.tech : [];
     const imageURL = certificate.image_url ? safeURL(certificate.image_url) : "";
+    const hasImage = Boolean(imageURL && imageURL !== "#");
 
     return `
       <article class="experience-card">
-        ${imageURL ? `
-          <button class="certificate-preview" type="button" aria-label="Preview ${escapeHTML(certificate.title)}">
-            <img src="${imageURL}" class="certificate-image" alt="${escapeHTML(certificate.title)} certificate">
+        ${hasImage ? `
+          <button class="certificate-preview" type="button" aria-label="Preview ${escapeHTML(title)}">
+            <img src="${imageURL}" class="certificate-image" alt="${escapeHTML(title)} certificate">
           </button>
         ` : ""}
         <p class="experience-type">Certificate / achievement</p>
-        <h3>${escapeHTML(certificate.title)}</h3>
-        <p>${escapeHTML(certificate.description)}</p>
-        ${tech.length ? `<div class="tag-list">${tech.map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}</div>` : ""}
+        <h3>${escapeHTML(title)}</h3>
+        <p>${escapeHTML(displayCertificateDescription(certificate))}</p>
+        ${tech.length ? `<div class="tag-list">${tech.map(tag => `<span>${escapeHTML(displayText(tag))}</span>`).join("")}</div>` : ""}
       </article>
     `;
   }).join("");
