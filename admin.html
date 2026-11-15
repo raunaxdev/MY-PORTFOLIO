@@ -1,93 +1,73 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Admin Dashboard | Raunak Portfolio</title>
-
-  <link rel="stylesheet" href="admin.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Portfolio Admin | Raunak Kumar Jha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="admin.css">
 </head>
-
 <body>
-
-  <!-- Login Screen -->
   <section class="login-screen" id="loginScreen">
     <div class="login-card">
-      <div class="logo-circle">R</div>
-      <h1>Admin Login</h1>
-      <p>Manage your digital portfolio content.</p>
-
+      <div class="logo-mark" aria-hidden="true">R</div>
+      <p class="eyebrow">Portfolio content</p>
+      <h1>Admin sign in</h1>
+      <p class="login-description">Sign in to manage portfolio content.</p>
       <form id="loginForm">
-        <input type="email" id="adminEmail" placeholder="Enter Admin Email" required />
-        <input type="password" id="adminPassword" placeholder="Enter Admin Password" required />
-        <button type="submit">Login</button>
+        <label for="adminEmail">Email</label>
+        <input type="email" id="adminEmail" placeholder="Admin email" autocomplete="username" required>
+        <label for="adminPassword">Password</label>
+        <input type="password" id="adminPassword" placeholder="Password" autocomplete="current-password" required>
+        <button type="submit" class="save-btn">Sign in</button>
       </form>
-   </div>
+    </div>
   </section>
 
-  <!-- Admin Dashboard -->
   <main class="admin-dashboard hidden" id="adminDashboard">
-
     <aside class="sidebar">
-      <div class="brand">
-        <div class="logo-circle small">R</div>
-        <div>
-          <h2>Raunak</h2>
-          <p>Portfolio Admin</p>
-        </div>
-      </div>
-
-      <nav class="admin-nav">
-        <button class="nav-btn active" data-section="projects">Projects</button>
-        <button class="nav-btn" data-section="journey">Journey</button>
-        <button class="nav-btn" data-section="certificates">Certificates</button>
-        <button class="nav-btn" data-section="goals">Goals</button>
-        <button class="nav-btn" data-section="feedback">Feedback</button>
+      <a class="brand" href="index.html">
+        <span class="logo-mark small" aria-hidden="true">R</span>
+        <span><strong>Raunak</strong><small>Portfolio admin</small></span>
+      </a>
+      <nav class="admin-nav" aria-label="Admin sections">
+        <button class="nav-btn active" type="button" data-section="projects">Projects</button>
+        <button class="nav-btn" type="button" data-section="journey">Journey</button>
+        <button class="nav-btn" type="button" data-section="certificates">Certificates</button>
+        <button class="nav-btn" type="button" data-section="feedback">Feedback</button>
       </nav>
-
       <div class="sidebar-footer">
-        <a href="index.html" target="_blank">Open Portfolio</a>
-        <button id="logoutBtn">Logout</button>
+        <a href="index.html" target="_blank" rel="noopener noreferrer">Open portfolio <span aria-hidden="true">↗</span></a>
+        <button id="logoutBtn" type="button">Sign out</button>
       </div>
     </aside>
 
     <section class="main-content">
       <header class="topbar">
         <div>
-          <p class="mini-title">Dashboard</p>
+          <p class="eyebrow">Dashboard</p>
           <h1 id="sectionTitle">Projects</h1>
         </div>
-
-        <button class="reset-btn" id="resetFormBtn">Clear Form</button>
+        <button class="reset-btn" id="resetFormBtn" type="button">Clear form</button>
       </header>
-
       <section class="content-layout">
-
-        <!-- Form Area -->
         <div class="form-panel" id="formPanel">
-          <h2 id="formTitle">Add New Item</h2>
-
+          <h2 id="formTitle">Add new item</h2>
           <form id="itemForm">
             <div id="dynamicFields"></div>
-
-            <button type="submit" class="save-btn" id="saveBtn">
-              Save Item
-            </button>
+            <button type="submit" class="save-btn" id="saveBtn">Save item</button>
           </form>
         </div>
-
-        <!-- List Area -->
         <div class="list-panel">
-          <h2 id="listTitle">Saved Items</h2>
+          <h2 id="listTitle">Saved items</h2>
           <div id="itemsList"></div>
         </div>
-
       </section>
     </section>
-
   </main>
-<script type="module" src="./admin.js"></script>
+  <script type="module" src="./admin.js"></script>
 </body>
 </html>

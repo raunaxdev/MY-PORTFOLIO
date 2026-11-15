@@ -1,72 +1,19 @@
 import { supabase } from "./supabase.js";
 
-// Typing Text
-const typingText = document.getElementById("typingText");
-
-const roles = [
-  "BCA Student",
-  "Aspiring Full Stack Developer",
-  "Web Developer",
-  "Coding Creator",
-  "Problem Solver"
-];
-
-let roleIndex = 0;
-let charIndex = 0;
-let isDeleting = false;
-
-function typeEffect() {
-  const currentRole = roles[roleIndex];
-
-  if (isDeleting) {
-    typingText.textContent = currentRole.substring(0, charIndex--);
-  } else {
-    typingText.textContent = currentRole.substring(0, charIndex++);
-  }
-
-  if (!isDeleting && charIndex === currentRole.length + 1) {
-    isDeleting = true;
-    setTimeout(typeEffect, 1200);
-    return;
-  }
-
-  if (isDeleting && charIndex === 0) {
-    isDeleting = false;
-    roleIndex = (roleIndex + 1) % roles.length;
-  }
-
-  setTimeout(typeEffect, isDeleting ? 55 : 95);
-}
-
-typeEffect();
-
-
-// Mobile Menu
 const menuBtn = document.getElementById("menuBtn");
 const navLinks = document.getElementById("navLinks");
-
-menuBtn.addEventListener("click", () => {
-  navLinks.classList.toggle("active");
-});
-
-document.querySelectorAll(".nav-links a").forEach(link => {
-  link.addEventListener("click", () => {
-    navLinks.classList.remove("active");
-  });
-});
-
-
-// Elements
-const journeyList = document.getElementById("journeyList");
 const projectList = document.getElementById("projectList");
 const certificateList = document.getElementById("certificateList");
-const goalList = document.getElementById("goalList");
 const feedbackForm = document.getElementById("feedbackForm");
+const contactSubmit = document.getElementById("contactSubmit");
+const contactStatus = document.getElementById("contactStatus");
+const imageModal = document.getElementById("imageModal");
+const modalImage = document.getElementById("modalImage");
+const modalClose = document.getElementById("modalClose");
 
-
-// Helpers
 function escapeHTML(value) {
   return String(value || "")
+    .replace(/[\p{Extended_Pictographic}\p{Regional_Indicator}\uFE0F\u200D\u20E3]/gu, "")
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
@@ -90,8 +37,6 @@ function safeURL(value) {
   return "#";
 }
 
-
-// Fetch Data
 async function getTableData(tableName) {
   const { data, error } = await supabase
     .from(tableName)
@@ -106,233 +51,135 @@ async function getTableData(tableName) {
   return data || [];
 }
 
-
-// Render Journey
-function renderJourney(data) {
-  journeyList.innerHTML = "";
-
-
-  if (!data.length) {
-    journeyList.innerHTML = `<p class="feedback-note">No journey updates added yet.</p>`;
-    return;
-  }
-
-  data.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "timeline-item reveal";
-
-    div.innerHTML = `
-      <span>${escapeHTML(item.date)}</span>
-      <h3>${escapeHTML(item.title)}</h3>
-      <p>${escapeHTML(item.description)}</p>
-    `;
-
-    journeyList.appendChild(div);
-  });
-}
-
-
-// Render Projects
 function renderProjects(data) {
-  projectList.innerHTML = "";
-
-  if (!data.length) {
-    projectList.innerHTML = `<p class="feedback-note">No projects added yet.</p>`;
-    return;
-  }
-
-  data.forEach(project => {
-    const div = document.createElement("div");
-    div.className = "card reveal";
-
+  projectList.innerHTML = data.map(project => {
     const tech = Array.isArray(project.tech) ? project.tech : [];
+    const imageURL = project.image_url ? safeURL(project.image_url) : "";
+    const liveURL = project.live ? safeURL(project.live) : "#";
+    const githubURL = project.github ? safeURL(project.github) : "#";
 
-   div.innerHTML = `
-  ${
-    project.image_url
-      ? `<img src="${safeURL(project.image_url)}" class="project-image" alt="${escapeHTML(project.title)}" />`
-      : `<div class="card-icon">${escapeHTML(project.icon || "💻")}</div>`
-  }
-
-  <h3>${escapeHTML(project.title)}</h3>
-  <p>${escapeHTML(project.description)}</p>
-
-  <div class="tags">
-    ${tech.map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}
-  </div>
-
-  <div class="card-links">
-    <a href="${safeURL(project.live)}" target="_blank">Live Demo</a>
-    <a href="${safeURL(project.github)}" target="_blank">GitHub</a>
-  </div>
-`;
-
-    projectList.appendChild(div);
-  });
+    return `
+      <article class="project-card">
+        ${imageURL ? `<img src="${imageURL}" class="project-image" alt="${escapeHTML(project.title)}">` : ""}
+        <p class="project-index">Project</p>
+        <h3>${escapeHTML(project.title)}</h3>
+        <p>${escapeHTML(project.description)}</p>
+        <div class="tag-list">${tech.map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}</div>
+        <div class="card-links">
+          ${project.live && liveURL !== "#" ? `<a href="${liveURL}" target="_blank" rel="noopener noreferrer">Live site</a>` : ""}
+          ${project.github && githubURL !== "#" ? `<a href="${githubURL}" target="_blank" rel="noopener noreferrer">Source</a>` : ""}
+        </div>
+      </article>
+    `;
+  }).join("");
 }
 
-
-// Render Certificates
 function renderCertificates(data) {
-  certificateList.innerHTML = "";
-
-  if (!data.length) {
-    certificateList.innerHTML = `<p class="feedback-note">No certificates added yet.</p>`;
-    return;
-  }
-
-  data.forEach(certificate => {
-    const div = document.createElement("div");
-    div.className = "card certificate-card reveal";
-
+  certificateList.innerHTML = data.map(certificate => {
     const tech = Array.isArray(certificate.tech) ? certificate.tech : [];
+    const imageURL = certificate.image_url ? safeURL(certificate.image_url) : "";
 
-    div.innerHTML = `
-      ${
-        certificate.image_url
-          ? `<img src="${safeURL(certificate.image_url)}" class="certificate-image" alt="${escapeHTML(certificate.title)}" />`
-          : `<div class="card-icon">${escapeHTML(certificate.icon || "🏆")}</div>`
-      }
-
-      <h3>${certificate.icon ? escapeHTML(certificate.icon) + " " : ""}${escapeHTML(certificate.title)}</h3>
-      <p>${escapeHTML(certificate.description)}</p>
-
-      <div class="tags">
-        ${tech.map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}
-      </div>
+    return `
+      <article class="experience-card">
+        ${imageURL ? `
+          <button class="certificate-preview" type="button" aria-label="Preview ${escapeHTML(certificate.title)}">
+            <img src="${imageURL}" class="certificate-image" alt="${escapeHTML(certificate.title)} certificate">
+          </button>
+        ` : ""}
+        <p class="experience-type">Certificate / achievement</p>
+        <h3>${escapeHTML(certificate.title)}</h3>
+        <p>${escapeHTML(certificate.description)}</p>
+        ${tech.length ? `<div class="tag-list">${tech.map(tag => `<span>${escapeHTML(tag)}</span>`).join("")}</div>` : ""}
+      </article>
     `;
-
-    certificateList.appendChild(div);
-  });
+  }).join("");
 }
 
-
-// Render Goals
-function renderGoals(data) {
-  goalList.innerHTML = "";
-
-  if (!data.length) {
-    goalList.innerHTML = `<p class="feedback-note">No goals added yet.</p>`;
-    return;
-  }
-
-  data.forEach(goal => {
-    const div = document.createElement("div");
-    div.className = "goal-item reveal";
-
-    div.innerHTML = `
-      <h3>${escapeHTML(goal.title)}</h3>
-      <p>${escapeHTML(goal.description)}</p>
-    `;
-
-    goalList.appendChild(div);
-  });
-}
-
-
-// Load All Data
 async function loadPortfolioData() {
-  journeyList.innerHTML = `<p class="feedback-note">Loading journey...</p>`;
-  projectList.innerHTML = `<p class="feedback-note">Loading projects...</p>`;
-  certificateList.innerHTML = `<p class="feedback-note">Loading certificates...</p>`;
-  goalList.innerHTML = `<p class="feedback-note">Loading goals...</p>`;
+  const [projects, certificates] = await Promise.all([
+    getTableData("projects"),
+    getTableData("certificates")
+  ]);
 
-  const journey = await getTableData("journey");
-  const projects = await getTableData("projects");
-  const certificates = await getTableData("certificates");
-  const goals = await getTableData("goals");
-
-  renderJourney(journey);
-  renderProjects(projects);
-  renderCertificates(certificates);
-  renderGoals(goals);
-
-  startRevealAnimation();
+  if (projects.length) renderProjects(projects);
+  if (certificates.length) renderCertificates(certificates);
 }
 
+menuBtn.addEventListener("click", () => {
+  const isExpanded = menuBtn.getAttribute("aria-expanded") === "true";
+  menuBtn.setAttribute("aria-expanded", String(!isExpanded));
+  menuBtn.setAttribute("aria-label", isExpanded ? "Open navigation" : "Close navigation");
+  navLinks.classList.toggle("active", !isExpanded);
+});
 
-// Feedback Submit
-feedbackForm.addEventListener("submit", async function (event) {
+navLinks.querySelectorAll("a").forEach(link => {
+  link.addEventListener("click", () => {
+    navLinks.classList.remove("active");
+    menuBtn.setAttribute("aria-expanded", "false");
+    menuBtn.setAttribute("aria-label", "Open navigation");
+  });
+});
+
+feedbackForm.addEventListener("submit", async event => {
   event.preventDefault();
 
   const name = document.getElementById("feedbackName").value.trim();
   const email = document.getElementById("feedbackEmail").value.trim();
   const message = document.getElementById("feedbackMessage").value.trim();
 
-  if (!name || !message) {
-    alert("Name aur feedback message required hai.");
+  if (!name || !email || !message) {
+    contactStatus.textContent = "Please complete all fields before sending.";
+    contactStatus.dataset.state = "error";
     return;
   }
 
-  const { error } = await supabase
-    .from("feedback")
-    .insert([
-      {
-        name,
-        email,
-        message
-      }
-    ]);
+  contactSubmit.disabled = true;
+  contactSubmit.textContent = "Sending…";
+  feedbackForm.setAttribute("aria-busy", "true");
+  contactStatus.textContent = "";
+  delete contactStatus.dataset.state;
 
-  if (error) {
-    console.error(error.message);
-    alert("Feedback submit nahi hua. Supabase policy check karo.");
-    return;
-  }
+  try {
+    const { error } = await supabase
+      .from("feedback")
+      .insert([{ name, email, message }]);
 
-  alert("Thank you! Your feedback submitted successfully.");
-  feedbackForm.reset();
-});
+    if (error) throw error;
 
-
-// Reveal Animation
-function startRevealAnimation() {
-  const revealElements = document.querySelectorAll(".reveal");
-
-  const revealObserver = new IntersectionObserver(
-    entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) {
-          entry.target.classList.add("active");
-        }
-      });
-    },
-    {
-      threshold: 0.15
-    }
-  );
-
-  revealElements.forEach(element => {
-    revealObserver.observe(element);
-  });
-}
-
-const imageModal = document.getElementById("imageModal");
-const modalImage = document.getElementById("modalImage");
-const modalClose = document.getElementById("modalClose");
-
-document.addEventListener("click", function (event) {
-  if (event.target.classList.contains("certificate-image")) {
-    modalImage.src = event.target.src;
-    imageModal.classList.add("active");
+    feedbackForm.reset();
+    contactStatus.textContent = "Your message was sent. Thank you.";
+    contactStatus.dataset.state = "success";
+  } catch (error) {
+    console.error("Error submitting contact message:", error.message);
+    contactStatus.textContent = "Your message could not be sent. Please try again or email directly.";
+    contactStatus.dataset.state = "error";
+  } finally {
+    contactSubmit.disabled = false;
+    contactSubmit.textContent = "Send message";
+    feedbackForm.removeAttribute("aria-busy");
   }
 });
 
-modalClose.addEventListener("click", function () {
-  imageModal.classList.remove("active");
-  modalImage.src = "";
+document.addEventListener("click", event => {
+  const previewButton = event.target.closest(".certificate-preview");
+  if (!previewButton || !imageModal || !modalImage) return;
+
+  const image = previewButton.querySelector("img");
+  if (!image) return;
+
+  modalImage.src = image.currentSrc || image.src;
+  modalImage.alt = image.alt;
+  imageModal.showModal();
 });
 
-imageModal.addEventListener("click", function (event) {
-  if (event.target === imageModal) {
-    imageModal.classList.remove("active");
-    modalImage.src = "";
-  }
+modalClose.addEventListener("click", () => imageModal.close());
+imageModal.addEventListener("click", event => {
+  if (event.target === imageModal) imageModal.close();
+});
+imageModal.addEventListener("close", () => {
+  modalImage.removeAttribute("src");
+  modalImage.alt = "";
 });
 
+document.getElementById("currentYear").textContent = new Date().getFullYear();
 loadPortfolioData();
-const currentYear = document.getElementById("currentYear");
-
-if (currentYear) {
-  currentYear.textContent = new Date().getFullYear();
-}
